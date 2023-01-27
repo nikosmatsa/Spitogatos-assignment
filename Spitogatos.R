@@ -16,7 +16,7 @@ df  = dplyr::tibble(data);df
 # selecting the needed columns 
 df_clean=df%>%select(id,ranking_score,agent_id,geography_name,sq_meters,
          price,year_of_construction,subtype,ad_type)%>%
-  # filter out the construction year,zero year and years that are below 1900
+  # filter out from the construction year,the zero year and years that are below 1900
   dplyr::filter(year_of_construction != 2155 & year_of_construction !=0 & year_of_construction > 1900)%>%
   # filter out the values of ranking score that have more than 5 digits
   dplyr::filter(nchar(ranking_score)<=5)%>%
