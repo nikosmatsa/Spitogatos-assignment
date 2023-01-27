@@ -116,15 +116,11 @@ reg==dat
 #     A higher average ranking score would indicate a higher level of competitiveness 
 #     as it would mean that listings  in that area are of higher quality.
 #
-# 3) Price per sq_meters: The average price per sq_meters of houses in a 
-#    specific area could be calculated. 
+# 3) Price per sq_meters: The average price per sq_meters of houses in a specific area can be considered.
 #    A higher average price per sq_meters would indicate a higher level of competitiveness
 #    as it would mean that properties in that area are more expensive.
 #
-# 4) Number of listings per agent: The average number of listings per agent in a specific area could be calculated. 
-#    A lower average number of listings per agent would indicate a higher level 
-#    of competitiveness as it would mean that
-#    there are more agents in that area, making it more competitive.
+
 
 
 Metrics = df_clean%>%
@@ -136,10 +132,13 @@ Metrics = df_clean%>%
             avg_ranking_score = mean(ranking_score),
   # 3) Calculate the average price per sq_meters of each area
             price_per_sqm = mean(price/sq_meters))%>%
+  # we create a new variable ad_type (the numeric levels of the original ad_type variable)
   dplyr::mutate(ad_type2 = base::ifelse(ad_type=="star",4,
                                         base::ifelse(ad_type=="premium",3,
                                                      base::ifelse(ad_type=="up",2,1))))%>%
+  # we arrange the whole data frame in a descending order according to ad_type2
   dplyr::arrange(desc(ad_type2))%>%
+  # we drop the created variable
   dplyr::select(-ad_type2)
   
 Metrics
@@ -227,24 +226,24 @@ ggplot2::ggplot(metrics_comp, aes(x = geography_name, y = sd_score, fill = ad_ty
 #
 #
 #
-#    The clean data as we used in question 1 and 2 are now merged (left_join) with column criteria 
-#    the names of the clean data frame
+#    The clean data as we used in question 1 and 2 are now merged (left_join) with the full data set 
+#    with column criteria the names of the clean data frame
 df_clean2 = left_join(df_clean,data,by=c("id","ranking_score","agent_id","geography_name","sq_meters",
                                          "price","year_of_construction","subtype","ad_type"))
 df_clean2
 
 
-#    create a final data frame to work with 
+#  more additional changes in order to create a final data frame to work with 
 df_final = df_clean2%>%
-  # we change the class of the vectors from as.interger to as.double
+  # we change the class of the all vectors from as.interger to as.double
   dplyr::mutate_if(is.integer, as.double)%>%
   # we select only the columns that are double (numeric)
   dplyr::select_if(is.double)%>%
-  # we change the column revonation year to 1 and 0.
+  # we change the column variable revonation year to 1 and 0:
   # If a listing has a renovation year then is equal to 1
   # otherwise 0. 
   dplyr::mutate(renovation = ifelse(!is.na(renovation_year),1,0))%>%
-  # we drop the columns id,previous renovation_year, agent_id and ranking score 
+  # we drop the columns id,(original) renovation_year, agent_id and ranking score 
   # because they are irrelevant to the pricing that the agent will 
   # use in order to valuate a property.
   dplyr::select(-c(id,renovation_year,agent_id,ranking_score))
@@ -258,13 +257,13 @@ df_final
 # Therefore, such variables are not adding any further information about the effect on Y (price of a house)
 # when we add them sequentially.
 
-
+# we run the full model with all variables 
 model = lm(price ~.,data= df_final)
 
 
-#  the statistical meαsure of collinearity is the variance inflation factor (vif) 
-#  if an explanatory variable has vif >10 then this variable must be droped 
-#  because contains no further information 
+#  the statistical measure of collinearity is the variance inflation factor (vif). 
+#  If an explanatory variable has vif >10 then this variable must be droped 
+#  because contains no further information.
 car::vif(model)
 # all the variables have less <10 vif
 summary(model)
@@ -276,8 +275,7 @@ df_final2
 
 # we run the final model without constant (has no logical sense in a multivariate regression
 # such this SpAn data)
-# The function below tells R to fit a linear regression model where the dependent variable
-# is the price and the independent variables are all the other columns in the data frame (indicated by the .).
+# we run the linear regression model without the constant b0.
 model2 = lm(price~.-1,data=df_final2)
 summary(model2)
 betas = round(as.numeric(coef(model2)),2);betas
@@ -287,10 +285,10 @@ dat = tibble(betas,variable);dat
 
 
 
-# Equivalently we used the Caret package in order to split data 
-# into training and testing set then use a function like train() 
-# to train the model with the training set and test it with the testing set, 
-# that way you can evaluate the model performance on unseen data.
+# Equivalently we used a train/test method in order to split data 
+# into training and testing set. Using the function train() 
+# to train the model with the training set and test it with the testing set. 
+# With this way we can evaluate the model performance on unseen data.
 
 set.seed(123)
 split = caret::createDataPartition(y = df_final2$price, p = 0.8, list = FALSE)
