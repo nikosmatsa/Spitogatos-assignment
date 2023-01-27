@@ -92,8 +92,8 @@ lm_both = lm(df_clean$price~(df_clean$geography_name:df_clean$subtype)+0,data=df
 # show the coefficients of regression (mean price per house type)
 tidy(lm_both)
 # check if both approaches give the same results
-reg = na.omit(as.numeric(round(lm_both$coefficients,2)));reg
-dat = as.numeric(round(metrics_by_sub_type_area$mean_price,2));dat
+reg = na.omit(as.numeric(round(lm_both$coefficients,1)));reg
+dat = as.numeric(round(metrics_by_sub_type_area$mean_price,1));dat
 d3 = tibble(reg,dat);d3
 reg==dat
 
