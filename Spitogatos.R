@@ -111,7 +111,7 @@ reg==dat
 #
 #
 #
-#    Below we suggest a few possible metrics that could be used to measure the competitiveness of an area:
+#    Below i suggest a few possible metrics that could be used to measure the competitiveness of an area:
 #  
 # 1)  Market Share: The market share of a specific area could be calculated by determining 
 #     the percentage of listings in that area 
@@ -207,7 +207,7 @@ ggplot2::ggplot(metrics_comp, aes(x = geography_name, y = sd_score, fill = ad_ty
 
 
 
-#  Alternatively we suggest (not quick way) : 
+#  Alternatively suggestion (not quick way) : 
 #
 #  1) Number of unique keywords per area: This metric would show the number of unique keywords
 #    used in the listings of a specific area. A higher number of unique keywords would indicate a higher level 
@@ -284,7 +284,7 @@ summary(model)
 df_final2=df_final%>%select(-balcony_area)
 df_final2
 
-# run the final model without constant (has no logical sense in a multivariate regression
+# run the final model without constant (including the constant b0 has no logical sense in a multivariate regression
 # such this SpAn data)
 # run the linear regression model without the constant b0.
 model2 = lm(price~.-1,data=df_final2)
