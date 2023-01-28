@@ -298,10 +298,9 @@ dat = tibble(betas,variable);dat
 #    principal component.   
 
 # 2) Additionally we suggest the Lasso Regression: 
-#     This method can be used to identify the most important attributes
+#     With this method we can identify the most important attributes
 #     by applying a L1 penalty term to linear regression which shrinks the coefficients
 #     of less important features to zero. However, it is important to note that categorical 
 #     variables need to be encoded as numeric values before they can be used in the model. 
 #     Common encoding techniques can be used such as dummy coding as we did in the proposed lm model.
-#     It is also important to keep in mind that Lasso regression is sensitive to the scale 
-#     of the variables and so it is recommended to scale the data before fitting the model.
+
