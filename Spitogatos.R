@@ -237,8 +237,8 @@ df_clean2
 df_final = df_clean2%>%
   # we change the class of the all vectors from as.interger to as.double
   dplyr::mutate_if(is.integer, as.double)%>%
-  # we select only the columns that are double (numeric)
-  dplyr::select_if(is.double)%>%
+  # we select only the columns that are double (numeric) and the geography name
+  dplyr::select(where(is.double),geography_name)%>%
   # we change the column variable revonation year to 1 and 0:
   # If a listing has a renovation year then is equal to 1
   # otherwise 0. 
@@ -285,18 +285,6 @@ dat = tibble(betas,variable);dat
 
 
 
-# Equivalently we used a train/test method in order to split data 
-# into training and testing set. Using the function train() 
-# to train the model with the training set and test it with the testing set. 
-# With this way we can evaluate the model performance on unseen data.
-
-set.seed(123)
-split = caret::createDataPartition(y = df_final2$price, p = 0.8, list = FALSE)
-train_df = df_final2[split, ]
-test_df = df_final2[-split, ]
-model = train(price ~ .-1, data = train_df, method = "lm")
-prediction = predict(model, newdata = test_df)
-summary(model)
 
 
 # --   Alternatives (not quick way) 
