@@ -4,7 +4,7 @@ library(tidyverse)
 library(readxl)
 library(broom)
 library(car)
-library(caret)
+
 
 # import file path
 # file.choose()
