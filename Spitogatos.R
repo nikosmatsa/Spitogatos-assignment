@@ -79,7 +79,7 @@ print(metrics_by_sub_type_area)
 # run the regression for house type 
 lm_type = lm(df_clean$price~df_clean$subtype-1)
 # show the coefficients of regression (mean price per house type)
-tidy(lm_type)
+broom::tidy(lm_type)
 # check if both approaches give the same results
 round(lm_type$coefficients,4) == round(metrics_by_subtype$mean_price,4)
 
@@ -88,7 +88,7 @@ round(lm_type$coefficients,4) == round(metrics_by_subtype$mean_price,4)
 # run the regression for per house type per geography area
 lm_area = lm(df_clean$price~df_clean$geography_name-1)
 # show the coefficients of regression (mean price per house type)
-tidy(lm_area)
+broom::tidy(lm_area)
 # check if both approaches give the same results
 round(lm_area$coefficients,4) == round(metrics_by_area$mean_price,4)
 
@@ -96,7 +96,7 @@ round(lm_area$coefficients,4) == round(metrics_by_area$mean_price,4)
 # run the regression for per geography area
 lm_both = lm(df_clean$price~(df_clean$geography_name:df_clean$subtype)+0,data=df_clean)
 # show the coefficients of regression (mean price per house type)
-tidy(lm_both)
+broom::tidy(lm_both)
 # check if both approaches give the same results
 reg = na.omit(as.numeric(round(lm_both$coefficients,1)));reg
 dat = as.numeric(round(metrics_by_sub_type_area$mean_price,1));dat
@@ -138,13 +138,13 @@ Metrics = df_clean%>%
             avg_ranking_score = mean(ranking_score),
   # 3) Calculate the average price per sq_meters of each area
             price_per_sqm = mean(price/sq_meters))%>%
-  # we create a new variable ad_type (the numeric levels of the original ad_type variable)
+  # create a new variable ad_type (the numeric levels of the original ad_type variable)
   dplyr::mutate(ad_type2 = base::ifelse(ad_type=="star",4,
                                         base::ifelse(ad_type=="premium",3,
                                                      base::ifelse(ad_type=="up",2,1))))%>%
-  # we arrange the whole data frame in a descending order according to ad_type2
+  # arrange the whole data frame in a descending order according to ad_type2
   dplyr::arrange(desc(ad_type2))%>%
-  # we drop the created variable
+  #  drop the created variable
   dplyr::select(-ad_type2)
   
 Metrics
@@ -173,16 +173,21 @@ ggplot2::ggplot(Metrics, aes(x = geography_name, y = price_per_sqm, fill = ad_ty
 
 #  Alternative 1
 #
-#  We can use the mean,standard deviation of ranking score per area per house type
+#  I can use the mean,standard deviation of ranking score per area per house type
 #
 #  Calculate competitiveness metrics
 metrics_comp = df_clean%>%
+  # group the data by first the geography and then by as_type
   dplyr::group_by(geography_name, ad_type) %>% 
+  # calculate the descriptives
   dplyr::summarize(mean_score = mean(ranking_score),sd_score=sd(ranking_score),number_of_listings = n())%>%
+  # create a new variable ad_type2 that gives ordinary levels to the categorical variable ad_type
   dplyr::mutate(ad_type2 = ifelse(ad_type=="star",4,
                            ifelse(ad_type=="premium",3,
                                   ifelse(ad_type=="up",2,1))))%>%
+  # arrange the whole data set in a descending order from 4 to 1 based on the previously created new variable
   dplyr::arrange(desc(ad_type2),mean_score)%>%
+  # drop the created variable ad_type2
   dplyr::select(-ad_type2)
 metrics_comp
 # Plot the metric mean of ranking score per area per house type
@@ -232,38 +237,38 @@ ggplot2::ggplot(metrics_comp, aes(x = geography_name, y = sd_score, fill = ad_ty
 #
 #
 #
-#    The clean data as we used in question 1 and 2 are now merged (left_join) with the full data set 
+#    The clean data that i used in question 1 and 2 are now merged (left_join) with the full data set 
 #    with column criteria the names of the clean data frame
 df_clean2 = left_join(df_clean,data,by=c("id","ranking_score","agent_id","geography_name","sq_meters",
                                          "price","year_of_construction","subtype","ad_type"))
 df_clean2
 
 
-#  more additional changes in order to create a final data frame to work with 
+  # more additional changes in order to create a final data frame to work with 
 df_final = df_clean2%>%
-  # we change the class of the all vectors from as.interger to as.double
+  # change the class of the all vectors from as.interger to as.double
   dplyr::mutate_if(is.integer, as.double)%>%
-  # we select only the columns that are double (numeric) and the geography name
+  # select only the columns that are double (numeric) and the geography name
   dplyr::select(where(is.double),geography_name)%>%
-  # we change the column variable revonation year to 1 and 0:
+  # change the column variable revonation year to 1 and 0:
   # If a listing has a renovation year then is equal to 1
   # otherwise 0. 
   dplyr::mutate(renovation = ifelse(!is.na(renovation_year),1,0))%>%
-  # we drop the columns id,(original) renovation_year, agent_id and ranking score 
+  # drop the columns id,(original) renovation_year, agent_id and ranking score 
   # because they are irrelevant to the pricing that the agent will 
   # use in order to valuate a property.
   dplyr::select(-c(id,renovation_year,agent_id,ranking_score))
 df_final
 
-#  we run a linear regression model in order to identify collinearity. 
+# I run a linear regression model in order to identify collinearity. 
 # (collinearity is the perfect (deterministic) linear relationship between 
 # one explanatory variable with (some of) the rest of the explanatories)
 # When 2 covariates are highly related => they carry similar information.
 # (since when we know the value of the one we can precisely predict the value of the other)
 # Therefore, such variables are not adding any further information about the effect on Y (price of a house)
-# when we add them sequentially.
+# when i add them sequentially.
 
-# we run the full model with all variables 
+#  run the full model with all variables 
 model = lm(price ~.,data= df_final)
 
 
@@ -279,9 +284,9 @@ summary(model)
 df_final2=df_final%>%select(-balcony_area)
 df_final2
 
-# we run the final model without constant (has no logical sense in a multivariate regression
+# run the final model without constant (has no logical sense in a multivariate regression
 # such this SpAn data)
-# we run the linear regression model without the constant b0.
+# run the linear regression model without the constant b0.
 model2 = lm(price~.-1,data=df_final2)
 summary(model2)
 betas = round(as.numeric(coef(model2)),2);betas
@@ -296,14 +301,14 @@ dat = tibble(betas,variable);dat
 # --   Alternatives (not quick way) 
 #
 #
-# 1) We suggest Principal Component Analysis (PCA) which is a dimensionality reduction technique 
+# 1) I suggest Principal Component Analysis (PCA) which is a dimensionality reduction technique 
 #    that can be used to identify the most important attributes or features in the housing market. 
 #    It works by transforming the original dataset into a new set of uncorrelated variables, 
 #    called principal components, which can explain the most variance in the original data.
 #    After this reduction we can run a linear model based on the loadings of each variable on each 
 #    principal component.   
 
-# 2) Additionally we suggest the Lasso Regression: 
+# 2) Additionally i suggest the Lasso Regression: 
 #     With this method we can identify the most important attributes
 #     by applying a L1 penalty term to linear regression which shrinks the coefficients
 #     of less important features to zero. However, it is important to note that categorical 
