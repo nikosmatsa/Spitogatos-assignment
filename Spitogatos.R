@@ -1,9 +1,15 @@
+#  to install the required libraries unhashtag the following
+#
+#  install.packages("tidyverse")
+#  install.packages("broom")
+#  install.packages("car")
+
 
 # Loading the needed libraries
 library(tidyverse)
-library(readxl)
 library(broom)
 library(car)
+
 
 
 # import file path
